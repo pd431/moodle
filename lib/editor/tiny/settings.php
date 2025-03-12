@@ -41,7 +41,13 @@ if ($ADMIN->fulltree) {
         new lang_string('branding_desc', 'editor_tiny'),
         1
     );
-
+    
+    $setting = new admin_setting_configcheckbox(
+        'editor_tiny/includethemecss',
+        new lang_string('includethemecss', 'editor_tiny'),
+        new lang_string('includethemecss_desc', 'editor_tiny'),
+        0
+    );
     $settings->add($setting);
 
     $setting = new admin_setting_configtext(
