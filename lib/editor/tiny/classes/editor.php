@@ -52,8 +52,21 @@ class editor extends \texteditor {
 
         $context = $PAGE->context;
 
+        // Get CSS URL based on setting
+        $siteconfig = get_config('editor_tiny');
+        $cssurl = $PAGE->theme->editor_css_url()->out(false);
+        
+        // If includethemecss is enabled, use theme CSS instead
+        if (!empty($siteconfig->includethemecss)) {
+            $themeCSS = '';
+            foreach ($PAGE->theme->css_urls($PAGE) as $url) {
+                $themeCSS .= ($themeCSS ? ',' : '') . $url->out(false);
+            }
+            $cssurl = $themeCSS;
+        }
+        
         $config = (object) [
-            'css' => $PAGE->theme->editor_css_url()->out(false),
+            'css' => $cssurl,
             'context' => $context->id,
             'plugins' => $manager->get_plugin_configuration($context, [], []),
         ];
@@ -160,11 +173,24 @@ class editor extends \texteditor {
             $context = $options['context'];
         }
 
+        // Get CSS URL based on setting
+        $siteconfig = get_config('editor_tiny');
+        $cssurl = $PAGE->theme->editor_css_url()->out(false);
+        
+        // If includethemecss is enabled, use theme CSS instead
+        if (!empty($siteconfig->includethemecss)) {
+            $themeCSS = '';
+            foreach ($PAGE->theme->css_urls($PAGE) as $url) {
+                $themeCSS .= ($themeCSS ? ',' : '') . $url->out(false);
+            }
+            $cssurl = $themeCSS;
+        }
+        
         // Generate the configuration for this editor.
         $siteconfig = get_config('editor_tiny');
         $config = (object) [
             // The URL to the CSS file for the editor.
-            'css' => $PAGE->theme->editor_css_url()->out(false),
+            'css' => $cssurl,
 
             // The current context for this page or editor.
             'context' => $context->id,
