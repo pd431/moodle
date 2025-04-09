@@ -1,6 +1,6 @@
 # core (subsystem) Upgrade notes
 
-## 5.0dev+
+## 5.0rc2
 
 ### Added
 
@@ -15,6 +15,17 @@
   This prevents display of the title in all layouts except `secure`.
 
   For more information see [MDL-75610](https://tracker.moodle.org/browse/MDL-75610)
+- Behat now supports email content verification using Mailpit.
+  You can check the contents of an email using the step `Then the email to "user@example.com" with subject containing "subject" should contain "content".`
+  To use this feature:
+  1. Ensure that Mailpit is running
+  2. Define the following constants in your `config.php`:
+      - `TEST_EMAILCATCHER_MAIL_SERVER` - The Mailpit server address (e.g. `0.0.0.0:1025`)
+      - `TEST_EMAILCATCHER_API_SERVER` - The Mailpit API server (qe.g. `http://localhost:8025`)
+
+  3. Ensure that the email catcher is set up using the step `Given an email catcher server is configured`.
+
+  For more information see [MDL-75971](https://tracker.moodle.org/browse/MDL-75971)
 - A new core\ip_utils::normalize_internet_address() method is created to sanitize an IP address, a range of IP addresses, a domain name or a wildcard domain matching pattern.
 
   Moodle previously allowed entries such as 192.168. or .moodle.org for certain variables (eg: $CFG->proxybypass). Since MDL-74289, these formats are no longer allowed. This method converts this informations into an authorized format. For example, 192.168. becomes 192.168.0.0/16 and .moodle.org becomes *.moodle.org.
@@ -22,6 +33,19 @@
   Also a new core\ip_utils::normalize_internet_address_list() method is created. Based on core\ip_utils::normalize_internet_address(), this method normalizes a string containing a series of Internet addresses.
 
   For more information see [MDL-79121](https://tracker.moodle.org/browse/MDL-79121)
+- The stored progress API has been updated. The `\core\output\stored_progress_bar` class has
+  now has a `store_pending()` method, which will create a record for the stored process, but
+  without a start time or progress percentage.
+  `\core\task\stored_progress_task_trait` has been updated with a new `initialise_stored_progress()` method,
+  which will call `store_pending()` for the task's progress bar. This allows the progress bar to be displayed
+  in a "pending" state, to show that a process has been queued but not started.
+
+  For more information see [MDL-81714](https://tracker.moodle.org/browse/MDL-81714)
+- A new `\core\output\task_indicator` component has been added to display a progress bar and message
+  for a background task using `\core\task\stored_progress_task_trait`. See the "Task indicator"
+  page in the component library for usage details.
+
+  For more information see [MDL-81714](https://tracker.moodle.org/browse/MDL-81714)
 - The deprecated implementation in course/view.php, which uses the extern_server_course function to handle routing between internal and external courses, can be improved by utilizing the Hook API. This enhancement is essential for a project involving multiple universities, as the Hook API provides a more generalized and flexible approach to route users to external courses from within other plugins.
 
   For more information see [MDL-83473](https://tracker.moodle.org/browse/MDL-83473)
@@ -37,6 +61,12 @@
 - Now lib/templates/select_menu.mustache has a new integer headinglevel context value to specify the heading level to keep the header accessibility when used as a tertiary navigation.
 
   For more information see [MDL-84208](https://tracker.moodle.org/browse/MDL-84208)
+- The new PHP enum core\output\local\properties\iconsize can be used to limit the amount of icons sizes an output component can use. The enum has the same values available in the theme_boost scss.
+
+  For more information see [MDL-84555](https://tracker.moodle.org/browse/MDL-84555)
+- A new method, `core_text::trim_ctrl_chars()`, has been introduced to clean control characters from text. This ensures cleaner input handling and prevents issues caused by invisible or non-printable characters
+
+  For more information see [MDL-84907](https://tracker.moodle.org/browse/MDL-84907)
 
 ### Changed
 
@@ -56,6 +86,11 @@
   Any plugin using these methods must update their uses.
 
   For more information see [MDL-81308](https://tracker.moodle.org/browse/MDL-81308)
+- PHPSpreadSheet has been updated to version 4.0.0.
+
+  All library usage should be via the Moodle wrapper and no change should be required.
+
+  For more information see [MDL-81664](https://tracker.moodle.org/browse/MDL-81664)
 - The Moodle subplugins.json format has been updated to accept a new `subplugintypes` object.
 
   This should have the same format as the current `plugintypes` format, except that the paths should be relative to the _plugin_ root instead of the Moodle document root.
@@ -116,6 +151,9 @@
 - The 'core_renderer::sr_text()' function has been deprecated, use 'core_renderer::visually_hidden_text()' instead.
 
   For more information see [MDL-81825](https://tracker.moodle.org/browse/MDL-81825)
+- The function imagecopybicubic() is now deprecated. The GD lib is a strict requirement, so use imagecopyresampled() instead.
+
+  For more information see [MDL-84449](https://tracker.moodle.org/browse/MDL-84449)
 
 ### Removed
 
@@ -128,6 +166,19 @@
 - Remove support deprecated boolean 'primary' parameter in \core\output\single_button. The 4th parameter is now a string and not a boolean (the use was to set it to true to have a primary button)
 
   For more information see [MDL-75875](https://tracker.moodle.org/browse/MDL-75875)
+- Final removal of the following constants/methods from the `\core\encyption` class, removing support for OpenSSL fallback:
+
+  - `METHOD_OPENSSL`
+  - `OPENSSL_CIPHER`
+  - `is_sodium_installed`
+
+  For more information see [MDL-78869](https://tracker.moodle.org/browse/MDL-78869)
+- Final deprecation of core_renderer\activity_information()
+
+  For more information see [MDL-78926](https://tracker.moodle.org/browse/MDL-78926)
+- Final removal of `share_activity()` in `core\moodlenet\activity_sender`, please use `share_resource()` instead.
+
+  For more information see [MDL-79086](https://tracker.moodle.org/browse/MDL-79086)
 - Final deprecation of methods `task_base::is_blocking` and `task_base::set_blocking`.
 
   For more information see [MDL-81509](https://tracker.moodle.org/browse/MDL-81509)
@@ -156,6 +207,18 @@
 - Final deprecation and removal of \core\event\course_module_instances_list_viewed
 
   For more information see [MDL-84593](https://tracker.moodle.org/browse/MDL-84593)
+
+### Fixed
+
+- url class now correctly supports multi level query parameter parsing and output.
+
+  This was previously supported in some methods such as get_query_string, but not others. This has been fixed to be properly supported.
+
+  For example https://example.moodle.net?test[2]=a&test[0]=b will be parsed as ['test' => [2 => 'a', 0 => 'b']]
+
+  All parameter values that are not arrays are casted to strings.
+
+  For more information see [MDL-77293](https://tracker.moodle.org/browse/MDL-77293)
 
 ## 4.5
 

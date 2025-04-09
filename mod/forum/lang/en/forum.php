@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'forum', language 'en', branch 'MOODLE_20_STABLE'
+ * Strings for component 'mod_forum', language 'en', branch 'MOODLE_20_STABLE'
  *
  * @package   mod_forum
  * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
@@ -778,18 +778,10 @@ $string['gradeitemnameforwholeforum'] = '{$a->name} whole forum';
 $string['gradeitemnameforrating'] = '{$a->name} rating';
 $string['grades:gradesavedfor'] = 'Grade saved for {$a->fullname}';
 $string['grades:gradesavefailed'] = 'Unable to save grade for {$a->fullname}: {$a->error}';
-$string['notgraded'] = 'Not graded';
 $string['nousersmatch'] = 'No user(s) found for given criteria';
 $string['showmoreusers'] = 'Show more users';
 $string['viewconversation'] = 'View discussion';
 $string['viewgrades'] = 'View grades';
-
-// Deprecated since Moodle 4.3.
-$string['completionpostsgroup'] = 'Require posts';
-$string['completiondiscussionsgroup'] = 'Require discussions';
-$string['completiondiscussionshelp'] = 'requiring discussions to complete';
-$string['completionrepliesgroup'] = 'Require replies';
-$string['completionreplieshelp'] = 'requiring replies to complete';
 
 // Deprecated since Moodle 4.5.
 $string['privacy:request:delete:discussion:name'] = 'Delete at the request of the author';

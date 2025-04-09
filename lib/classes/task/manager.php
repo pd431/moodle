@@ -194,7 +194,7 @@ class manager {
      * @param adhoc_task $task
      * @return \stdClass|false
      */
-    protected static function get_queued_adhoc_task_record($task) {
+    public static function get_queued_adhoc_task_record($task) {
         global $DB;
 
         $record = self::record_from_adhoc_task($task);
@@ -650,15 +650,17 @@ class manager {
         foreach ($records as $record) {
             $task = self::scheduled_task_from_record($record);
 
+            // Safety check in case the task in the DB does not match a real class (maybe something was uninstalled).
+            if (!$task) {
+                continue;
+            }
+
             // Tasks belonging to deprecated plugin types are excluded.
             if (self::task_component_is_deprecated($task)) {
                 continue;
             }
 
-            // Safety check in case the task in the DB does not match a real class (maybe something was uninstalled).
-            if ($task) {
-                $tasks[] = $task;
-            }
+            $tasks[] = $task;
         }
 
         return $tasks;

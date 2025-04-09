@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'course', language 'en', branch 'MOODLE_20_STABLE'
+ * Strings for component 'core_course', language 'en', branch 'MOODLE_20_STABLE'
  *
  * @package   core_course
  * @copyright 2018 Adrian Greeve <adriangreeve.com>
@@ -115,7 +115,7 @@ $string['norecentaccessesinfomessage'] = 'Hi {$a->userfirstname},
 <p>A number of students in {$a->coursename} have not accessed the course recently.</p>';
 $string['noteachinginfomessage'] = 'Hi {$a->userfirstname},
 <p>Courses with start dates in the next week have been identified as having no teacher or student enrolments.</p>';
-$string['overview_info'] = 'View all the activities in this course, including key details like due date and updates.';
+$string['overview_info'] = 'An overview of all activities in the course, with dates and other information.';
 $string['overview_missing_notice'] = 'Go to {$a} for more details.';
 $string['overview_missing_title'] = 'Information not available here for {$a} activities';
 $string['overview_modname'] = '{$a} overview page';
@@ -173,9 +173,6 @@ $string['targetlabelteachingyes'] = 'Users with teaching capabilities who have a
 $string['targetlabelteachingno'] = 'Courses at risk of not starting';
 $string['totalactivities'] = 'Activities: {$a}';
 $string['gotosection'] = 'Go to section {$a}';
-
-// Deprecated since Moodle 4.3.
-$string['aria:courseimage'] = 'Course image';
 
 // Deprecated since Moodle 4.5.
 $string['daystakingcourse'] = 'Days taking course';
