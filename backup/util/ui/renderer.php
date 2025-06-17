@@ -202,7 +202,7 @@ class core_backup_renderer extends plugin_renderer_base {
                         $table->head = array(get_string('module', 'backup'), get_string('title', 'backup'), get_string('userinfo', 'backup'));
                         $table->colclasses = array('modulename', 'moduletitle', 'userinfoincluded');
                         $table->align = array('left', 'left', 'center');
-                        $table->attributes = array('class' => 'activitytable generaltable');
+                        $table->attributes = ['class' => 'activitytable table generaltable'];
                         $table->data = array();
                     }
                     $name = get_string('pluginname', $activity->modulename);
@@ -690,7 +690,7 @@ class core_backup_renderer extends plugin_renderer_base {
             }
 
             $table = new html_table();
-            $table->attributes['class'] = 'backup-files-table generaltable';
+            $table->attributes['class'] = 'backup-files-table table generaltable';
             $table->head = $tablehead;
             $table->width = '100%';
             $table->data = [];
@@ -1051,7 +1051,7 @@ class core_backup_renderer extends plugin_renderer_base {
         $tablehead = array(get_string('course'), get_string('time'), get_string('status', 'backup'));
 
         $table = new html_table();
-        $table->attributes['class'] = 'backup-files-table generaltable';
+        $table->attributes['class'] = 'backup-files-table table generaltable';
         $table->head = $tablehead;
         $tabledata = array();
 
@@ -1092,7 +1092,7 @@ class core_backup_renderer extends plugin_renderer_base {
         );
 
         $table = new html_table();
-        $table->attributes['class'] = 'backup-files-table generaltable';
+        $table->attributes['class'] = 'backup-files-table table generaltable';
         $table->head = $tablehead;
 
         $tabledata = array();
@@ -1104,8 +1104,9 @@ class core_backup_renderer extends plugin_renderer_base {
             $sourceurl = new \moodle_url('/course/view.php', array('id' => $copy->sourceid));
 
             $tablerow = array(
-                html_writer::link($sourceurl, $copy->source),
-                $copy->destination,
+                html_writer::link($sourceurl, format_string($copy->source, true,
+                    ['context' => context_course::instance($copy->sourceid)])),
+                format_string($copy->destination, true, ['context' => context_course::instance($copy->sourceid)]),
                 userdate($copy->timecreated),
                 get_string($copy->operation),
                 $this->get_status_display($copy->status, $copy->backupid, $copy->restoreid, $copy->operation)

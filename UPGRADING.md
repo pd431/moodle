@@ -6,7 +6,312 @@ More detailed information on key changes can be found in the [Developer update n
 
 The format of this change log follows the advice given at [Keep a CHANGELOG](https://keepachangelog.com).
 
-## 5.0rc2
+## 5.1dev
+
+### core
+
+#### Added
+
+- - Added is_site_registered_in_hub method in lib/classes/hub/api.php to
+    check if the site is registered or not.
+  - Added get_secret method in lib/classes/hub/registration.php to get site's secret.
+
+  For more information see [MDL-83448](https://tracker.moodle.org/browse/MDL-83448)
+- Added a new optional param to adhoc_task_failed and scheduled_task_failed to allow skipping log finalisation when called from a separate task.
+
+  For more information see [MDL-84442](https://tracker.moodle.org/browse/MDL-84442)
+- There is a new `core/page_title` Javascript module for manipulating the current page title
+
+  For more information see [MDL-84804](https://tracker.moodle.org/browse/MDL-84804)
+
+#### Changed
+
+- Changes were implemented to make `checkbox-toggleall` output component more inclusive:
+
+  * Replace the references to `master` checkboxes with `toggler`.
+  * Replace the references to `slave` checkboxes with `target`.
+
+  For more information see [MDL-79756](https://tracker.moodle.org/browse/MDL-79756)
+
+#### Deprecated
+
+- The following `core/checkbox-toggleall` templates have been deprecated:
+
+  - `core/checkbox-toggleall-master-button` - This is replaced with `core/checkbox-toggleall-toggler-button`
+  - `core/checkbox-toggleall-master` - This is replaced with `core/checkbox-toggleall-toggler`
+  - `core/checkbox-toggleall-slave` - This is replaced with `core/checkbox-toggleall-target`
+
+  The following items in the `core/checkbox-toggleall` JS module have been deprecated:
+
+  - Method:
+      - `updateSlavesFromMasterState()` - This is replaced with `updateTargetsFromTogglerState()`.
+
+  - Usage of the following selectors:
+      - `data-toggle=master` - This is replaced with `data-toggle=toggler`.
+      - `data-toggle=slave` - This is replaced with `data-toggle=target`.
+
+  The usage of these selectors will continue to be supported until they are removed by final deprecation. In the meantime, a deprecation warning in the JavaScript console will be shown if usage of these selectors is detected.
+
+  For more information see [MDL-79756](https://tracker.moodle.org/browse/MDL-79756)
+
+### core_auth
+
+#### Added
+
+- A new method called `get_additional_upgrade_token_parameters` has been added to `oauth2_client` class. This will allow custom clients to override this one and add their extra parameters for upgrade token request.
+
+  For more information see [MDL-80380](https://tracker.moodle.org/browse/MDL-80380)
+
+### core_badges
+
+#### Removed
+
+- Final removal of core_badges_renderer::render_badge_collection() and core_badges_renderer::render_badge_recipients()
+
+  For more information see [MDL-80455](https://tracker.moodle.org/browse/MDL-80455)
+
+### core_course
+
+#### Deprecated
+
+- The duplicatesection param in course/view.php is deprecated. Use course/format/update.php with action section_duplicate instead.
+
+  For more information see [MDL-84216](https://tracker.moodle.org/browse/MDL-84216)
+
+### core_courseformat
+
+#### Changed
+
+- The param $maxsections of get_num_sections_data in addsection output is not used anymore. If your format overrides this method, you should add a default value 0 to be consistent with the new implementation.
+
+  For more information see [MDL-84291](https://tracker.moodle.org/browse/MDL-84291)
+
+#### Deprecated
+
+- The maxsections setting is now considered deprecated and will be removed in Moodle 6.0. Consider implementing your own setting in your format plugin if needed.
+
+  For more information see [MDL-84291](https://tracker.moodle.org/browse/MDL-84291)
+- The format base method get_max_sections has been deprecated, as the maxsections setting is also deprecated and no longer in use.
+
+  For more information see [MDL-84291](https://tracker.moodle.org/browse/MDL-84291)
+
+### core_grades
+
+#### Removed
+
+- The previously deprecate methods have been removed:
+    - grade_structure::get_grade_analysis_icon
+    - grade_structure::get_reset_icon
+    - grade_structure::get_edit_icon
+    - grade_structure::get_hiding_icon
+    - grade_structure::get_locking_icon
+    - grade_structure::get_calculation_icon
+
+  For more information see [MDL-77307](https://tracker.moodle.org/browse/MDL-77307)
+
+### core_message
+
+#### Added
+
+- The web service `core_message_get_member_info` additionally returns `cancreatecontact` which is a boolean value for a user's permission to add a contact.
+
+  For more information see [MDL-72123](https://tracker.moodle.org/browse/MDL-72123)
+
+### core_question
+
+#### Deprecated
+
+- Intial deprecation of core_question_bank_renderer::render_question_pagination() and the associated template file. Rendering the question pagination is now done via ajax based pagination.
+
+  For more information see [MDL-78091](https://tracker.moodle.org/browse/MDL-78091)
+
+#### Removed
+
+- Final deprecation of:
+    - core_question\local\bank\random_question_loader::get_next_question_id()
+    - core_question\local\bank\random_question_loader::get_category_key()
+    - core_question\local\bank\random_question_loader::ensure_questions_for_category_loaded()
+    - core_question\local\bank\random_question_loader::get_question_ids()
+    - core_question\local\bank\random_question_loader::is_question_available()
+    - core_question\local\bank\random_question_loader::get_questions()
+    - core_question\local\bank\random_question_loader::count_questions()
+    - core_question\local\bank\view::display_top_pagnation()
+    - core_question\local\bank\view::display_bottom_pagination()
+    - question_finder::get_questions_from_categories_with_usage_counts()
+    - question_finder::get_questions_from_categories_and_tags_with_usage_counts()
+
+  For more information see [MDL-78091](https://tracker.moodle.org/browse/MDL-78091)
+
+#### Fixed
+
+- The unit test repeated\_restore\_test::test\_restore\_course\_with\_same\_stamp\_questions was passing incorrectly on 5.x for question types that use answers.
+  Maintainers of third-party question types may want to re-run the test with the fix in place, or if they have copied parts of this test as the basis of a test in their own plugin, review the changes and see if they should be reflected in their own test.
+
+  For more information see [MDL-85556](https://tracker.moodle.org/browse/MDL-85556)
+
+### core_reportbuilder
+
+#### Added
+
+- The `report_action` class now accepts a `pix_icon` to include inside the rendered action element
+
+  For more information see [MDL-85216](https://tracker.moodle.org/browse/MDL-85216)
+
+### core_user
+
+#### Added
+
+- New method `\core_user::get_dummy_fullname(...)` for returning dummy user fullname comprised of configured name fields only
+
+  For more information see [MDL-82132](https://tracker.moodle.org/browse/MDL-82132)
+
+### block_site_main_menu
+
+#### Added
+
+- The "Main menu" block has been renamed to "Additional activities." Its title is now customizable, and it can be used in course formats without a dedicated view page (for instance, Single activity). On the Home page, this block has also been renamed; administrators will need to manually revert the name if they wish to retain "Main menu" after upgrading.
+
+  For more information see [MDL-85392](https://tracker.moodle.org/browse/MDL-85392)
+
+### format_topics
+
+#### Added
+
+- Now the custom sections format won't ask for initial sections on the creation form. Instead it will use the system number of sections settings directly.
+
+  For more information see [MDL-84291](https://tracker.moodle.org/browse/MDL-84291)
+
+### format_weeks
+
+#### Added
+
+- The weekly sections format now has a system setting called Maximum initial number of weeks that replaced the old "Max sections" when creating a new course
+
+  For more information see [MDL-84291](https://tracker.moodle.org/browse/MDL-84291)
+
+### gradereport_grader
+
+#### Removed
+
+- The previously deprecated methods have been removed:
+    - grade_report_grader::get_left_icons_row
+    - grade_report_grader::get_right_icons_row
+    - grade_report_grader::get_icons
+
+  For more information see [MDL-77307](https://tracker.moodle.org/browse/MDL-77307)
+
+### gradereport_singleview
+
+#### Added
+
+- The `grade/report/singleview/js/singleview.js` file has been removed. And the `grade/report/singleview/amd/src/singleview.js` file has been added. The new file is converted from YUI to native JS.
+
+  For more information see [MDL-84071](https://tracker.moodle.org/browse/MDL-84071)
+
+### mod_label
+
+#### Removed
+
+- The dndmedia setting has been removed. From now on dropping a media file into a course will always ask the user if they want to create a label.
+
+  For more information see [MDL-83081](https://tracker.moodle.org/browse/MDL-83081)
+
+### mod_qbank
+
+#### Changed
+
+- The bulk_action_base class has gotten a get_bulk_action_classes function to let bulk actions specify additional classes to add to the bulk action menu entry. If none is defined in the child, '' is returned.
+
+  For more information see [MDL-84548](https://tracker.moodle.org/browse/MDL-84548)
+
+### mod_quiz
+
+#### Deprecated
+
+- Final deprecations for the quiz. The following functions have been removed:
+    - quiz_has_question_use
+    - quiz_update_sumgrades
+    - quiz_update_all_attempt_sumgrades
+    - quiz_update_all_final_grades
+    - quiz_set_grade
+    - quiz_save_best_grade
+    - quiz_calculate_best_grade
+    - quiz_calculate_best_attempt
+
+  For more information see [MDL-76612](https://tracker.moodle.org/browse/MDL-76612)
+- Initial deprecation add_random_form and associates.
+  The just removed mod_quiz\form\add_random_form was the only place in core where the mod_quiz/add_random_form javascript was called, so we can deprecate this now. This also enables us to deprecate the mod_quiz/random_question_form_preview javascript and the mod_quiz/random_question_form_preview_question_list template as they are direct dependends.
+
+  For more information see [MDL-78091](https://tracker.moodle.org/browse/MDL-78091)
+
+#### Removed
+
+- Final deprecations for the quiz. The following files have been removed:
+    - mod/quiz/accessmanager_form.php
+    - mod/quiz/accessmanager.php
+    - mod/quiz/accessrule/accessrulebase.php
+    - mod/quiz/attemptlib.php
+    - mod/quiz/cronlib.php
+    - mod/quiz/override_form.php
+    - mod/quiz/renderer.php
+    - mod/quiz/report/attemptsreport_form.php
+    - mod/quiz/report/attemptsreport_options.php
+    - mod/quiz/report/attemptsreport_table.php
+    - mod/quiz/report/attemptsreport.php
+    - mod/quiz/report/default.php
+
+  For more information see [MDL-76612](https://tracker.moodle.org/browse/MDL-76612)
+- Final deprecations for the quiz. The following methods have been removed:
+     - mod_quiz\output\renderer::no_questions_message
+     - mod_quiz\output\renderer::render_mod_quiz_links_to_other_attempts
+     - mod_quiz\output\renderer::render_quiz_nav_question_button
+     - mod_quiz\output\renderer::render_quiz_nav_section_heading
+     - mod_quiz\structure::get_slot_tags_for_slot_id
+     - mod_quiz\structure::is_display_number_customised
+
+  For more information see [MDL-76612](https://tracker.moodle.org/browse/MDL-76612)
+- Final deprecations for the quiz. The following classes have been removed:
+    - mod_quiz_overdue_attempt_updater
+    - moodle_quiz_exception
+
+  For more information see [MDL-76612](https://tracker.moodle.org/browse/MDL-76612)
+- The const quiz_statistics\calculator::TIME_TO_CACHE has been removed.
+
+  For more information see [MDL-76612](https://tracker.moodle.org/browse/MDL-76612)
+- Final deprecation of:
+    - mod_quiz\form\add_random_form::class
+    - mod_quiz\local\structure\slot_random::set_tags()
+    - mod_quiz\local\structure\slot_random::set_tags_by_id()
+    - const quiz_statistics\calculator::TIME_TO_CACHE
+    - quiz_add_random_questions()
+
+  For more information see [MDL-78091](https://tracker.moodle.org/browse/MDL-78091)
+
+### mod_scorm
+
+#### Deprecated
+
+- The method `\mod_scorm\report::generate_master_checkbox()` has been deprecated and should no longer be used. SCORM report plugins calling this method should use `\mod_scorm\report::generate_toggler_checkbox()` instead.
+
+  For more information see [MDL-79756](https://tracker.moodle.org/browse/MDL-79756)
+
+### qtype_multichoice
+
+#### Changed
+
+- Restrict override of margin-bottom for fitem_id_answer_* and fitem_id_fraction_* divs to own edit form. Question type plugins currently benefitting from the unlimited style override will need to change their styles.css accordingly. An example can be found in calculatedmulti's style sheet.
+
+  For more information see [MDL-85240](https://tracker.moodle.org/browse/MDL-85240)
+
+### report_progress
+
+#### Changed
+
+- Added a new optional parameter $activegroup to render_groups_select()
+
+  For more information see [MDL-82381](https://tracker.moodle.org/browse/MDL-82381)
+
+## 5.0
 
 ### core
 
@@ -69,6 +374,9 @@ The format of this change log follows the advice given at [Keep a CHANGELOG](htt
 - Now lib/templates/select_menu.mustache has a new integer headinglevel context value to specify the heading level to keep the header accessibility when used as a tertiary navigation.
 
   For more information see [MDL-84208](https://tracker.moodle.org/browse/MDL-84208)
+- The public method `get_slashargument` has been added to the `url` class.
+
+  For more information see [MDL-84351](https://tracker.moodle.org/browse/MDL-84351)
 - The new PHP enum core\output\local\properties\iconsize can be used to limit the amount of icons sizes an output component can use. The enum has the same values available in the theme_boost scss.
 
   For more information see [MDL-84555](https://tracker.moodle.org/browse/MDL-84555)
@@ -564,6 +872,12 @@ The format of this change log follows the advice given at [Keep a CHANGELOG](htt
   with `async: false`.
 
   For more information see [MDL-81714](https://tracker.moodle.org/browse/MDL-81714)
+
+#### Changed
+
+- The `grade_object::fetch_all_helper()` now accepts a new `$sort` parameter with a default value is `id ASC` to sort the grade instances
+
+  For more information see [MDL-85115](https://tracker.moodle.org/browse/MDL-85115)
 
 #### Deprecated
 

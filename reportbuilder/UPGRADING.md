@@ -1,6 +1,14 @@
 # core_reportbuilder (subsystem) Upgrade notes
 
-## 5.0rc2
+## 5.1dev
+
+### Added
+
+- The `report_action` class now accepts a `pix_icon` to include inside the rendered action element
+
+  For more information see [MDL-85216](https://tracker.moodle.org/browse/MDL-85216)
+
+## 5.0
 
 ### Added
 

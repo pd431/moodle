@@ -267,6 +267,9 @@ class view {
         $this->init_question_actions();
         $this->init_sort();
         $this->init_bulk_actions();
+
+        // Record that this question bank has been used.
+        question_bank_helper::add_bank_context_to_recently_viewed($contexts->lowest());
     }
 
     /**
@@ -1152,64 +1155,19 @@ class view {
     }
 
     /**
-     * Display the top pagination bar.
-     *
-     * @param object $pagination
      * @deprecated since Moodle 4.3
-     * @todo Final deprecation on Moodle 4.7 MDL-78091
      */
+    #[\core\attribute\deprecated('display_questions()', since: '4.3', mdl: 'MDL-72321', final: true)]
     public function display_top_pagnation($pagination): void {
-        debugging(
-            'Function display_top_pagnation() is deprecated, please use display_questions() for ajax based pagination.',
-            DEBUG_DEVELOPER
-        );
-        global $PAGE;
-        $displaydata = [
-            'pagination' => $pagination
-        ];
-        echo $PAGE->get_renderer('core_question', 'bank')->render_question_pagination($displaydata);
+        \core\deprecation::emit_deprecation_if_present([self::class, __FUNCTION__]);
     }
 
     /**
-     * Display bottom pagination bar.
-     *
-     * @param string $pagination
-     * @param int $totalnumber
-     * @param int $perpage
-     * @param \moodle_url $pageurl
      * @deprecated since Moodle 4.3
-     * @todo Final deprecation on Moodle 4.7 MDL-78091
      */
+    #[\core\attribute\deprecated('display_questions()', since: '4.3', mdl: 'MDL-72321', final: true)]
     public function display_bottom_pagination($pagination, $totalnumber, $perpage, $pageurl): void {
-        debugging(
-            'Function display_bottom_pagination() is deprecated, please use display_questions() for ajax based pagination.',
-            DEBUG_DEVELOPER
-        );
-        global $PAGE;
-        $displaydata = array (
-            'extraclasses' => 'pagingbottom',
-            'pagination' => $pagination,
-            'biggertotal' => true,
-        );
-        if ($totalnumber > $this->pagesize) {
-            $displaydata['showall'] = true;
-            if ($perpage == $this->pagesize) {
-                $url = new \moodle_url($pageurl, array_merge($pageurl->params(),
-                    ['qpage' => 0, 'qperpage' => MAXIMUM_QUESTIONS_PER_PAGE]));
-                if ($totalnumber > MAXIMUM_QUESTIONS_PER_PAGE) {
-                    $displaydata['totalnumber'] = MAXIMUM_QUESTIONS_PER_PAGE;
-                } else {
-                    $displaydata['biggertotal'] = false;
-                    $displaydata['totalnumber'] = $totalnumber;
-                }
-            } else {
-                $url = new \moodle_url($pageurl, array_merge($pageurl->params(),
-                    ['qperpage' => $this->pagesize]));
-                $displaydata['totalnumber'] = $this->pagesize;
-            }
-            $displaydata['showallurl'] = $url;
-        }
-        echo $PAGE->get_renderer('core_question', 'bank')->render_question_pagination($displaydata);
+        \core\deprecation::emit_deprecation_if_present([self::class, __FUNCTION__]);
     }
 
     /**
@@ -1244,6 +1202,7 @@ class view {
                 $actiondata->actionname = $action->get_bulk_action_title();
                 $actiondata->actionkey = $key;
                 $actiondata->actionurl = new \moodle_url($action->get_bulk_action_url(), $params);
+                $actiondata->actionclasses = $action->get_bulk_action_classes();
                 $bulkactiondata[] = $actiondata;
 
                 $bulkactiondatas ['bulkactionitems'] = $bulkactiondata;
@@ -1325,7 +1284,7 @@ class view {
         // Start of the table.
         echo \html_writer::start_tag('table', [
             'id' => 'categoryquestions',
-            'class' => 'question-bank-table generaltable',
+            'class' => 'question-bank-table table generaltable',
             'data-defaultsort' => json_encode($this->sort),
         ]);
 

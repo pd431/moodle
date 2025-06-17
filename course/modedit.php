@@ -72,15 +72,6 @@ if (!empty($add)) {
     // will be the closest match we have.
     navigation_node::override_active_url(course_get_url($course, $section));
 
-    // MDL-69431 Validate that $section (url param) does not exceed the maximum for this course / format.
-    // If too high (e.g. section *id* not number) non-sequential sections inserted in course_sections table.
-    // Then on import, backup fills 'gap' with empty sections (see restore_rebuild_course_cache). Avoid this.
-    $courseformat = course_get_format($course);
-    $maxsections = $courseformat->get_max_sections();
-    if ($section > $maxsections) {
-        throw new \moodle_exception('maxsectionslimit', 'moodle', '', $maxsections);
-    }
-
     list($module, $context, $cw, $cm, $data) = prepare_new_moduleinfo_data($course, $add, $section);
     $data->return = 0;
     if (!is_null($sectionreturn)) {
@@ -127,7 +118,7 @@ if (!empty($add)) {
     $sectionname = get_section_name($course, $cw);
     $fullmodulename = get_string('modulename', $module->name);
     $pageheading = get_string('editsettings', 'moodle');
-    $pagetitle = get_string('edita', 'moodle', $fullmodulename) . ': ' . $cm->name;
+    $pagetitle = get_string('edita', 'moodle', $fullmodulename) . moodle_page::TITLE_SEPARATOR . $cm->name;
     $navbaraddition = null;
 
 } else {

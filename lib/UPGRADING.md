@@ -1,6 +1,52 @@
 # core (subsystem) Upgrade notes
 
-## 5.0rc2
+## 5.1dev
+
+### Added
+
+- - Added is_site_registered_in_hub method in lib/classes/hub/api.php to
+    check if the site is registered or not.
+  - Added get_secret method in lib/classes/hub/registration.php to get site's secret.
+
+  For more information see [MDL-83448](https://tracker.moodle.org/browse/MDL-83448)
+- Added a new optional param to adhoc_task_failed and scheduled_task_failed to allow skipping log finalisation when called from a separate task.
+
+  For more information see [MDL-84442](https://tracker.moodle.org/browse/MDL-84442)
+- There is a new `core/page_title` Javascript module for manipulating the current page title
+
+  For more information see [MDL-84804](https://tracker.moodle.org/browse/MDL-84804)
+
+### Changed
+
+- Changes were implemented to make `checkbox-toggleall` output component more inclusive:
+
+  * Replace the references to `master` checkboxes with `toggler`.
+  * Replace the references to `slave` checkboxes with `target`.
+
+  For more information see [MDL-79756](https://tracker.moodle.org/browse/MDL-79756)
+
+### Deprecated
+
+- The following `core/checkbox-toggleall` templates have been deprecated:
+
+  - `core/checkbox-toggleall-master-button` - This is replaced with `core/checkbox-toggleall-toggler-button`
+  - `core/checkbox-toggleall-master` - This is replaced with `core/checkbox-toggleall-toggler`
+  - `core/checkbox-toggleall-slave` - This is replaced with `core/checkbox-toggleall-target`
+
+  The following items in the `core/checkbox-toggleall` JS module have been deprecated:
+
+  - Method:
+      - `updateSlavesFromMasterState()` - This is replaced with `updateTargetsFromTogglerState()`.
+
+  - Usage of the following selectors:
+      - `data-toggle=master` - This is replaced with `data-toggle=toggler`.
+      - `data-toggle=slave` - This is replaced with `data-toggle=target`.
+
+  The usage of these selectors will continue to be supported until they are removed by final deprecation. In the meantime, a deprecation warning in the JavaScript console will be shown if usage of these selectors is detected.
+
+  For more information see [MDL-79756](https://tracker.moodle.org/browse/MDL-79756)
+
+## 5.0
 
 ### Added
 
@@ -61,6 +107,9 @@
 - Now lib/templates/select_menu.mustache has a new integer headinglevel context value to specify the heading level to keep the header accessibility when used as a tertiary navigation.
 
   For more information see [MDL-84208](https://tracker.moodle.org/browse/MDL-84208)
+- The public method `get_slashargument` has been added to the `url` class.
+
+  For more information see [MDL-84351](https://tracker.moodle.org/browse/MDL-84351)
 - The new PHP enum core\output\local\properties\iconsize can be used to limit the amount of icons sizes an output component can use. The enum has the same values available in the theme_boost scss.
 
   For more information see [MDL-84555](https://tracker.moodle.org/browse/MDL-84555)

@@ -405,22 +405,6 @@ form.popupform div {
     overflow: auto;
 }
 
-// Position required for table sizing inside a flex container.
-.no-overflow > .generaltable {
-    margin-bottom: 0;
-}
-
-.no-overflow,
-.table-responsive {
-    .generaltable {
-        .visually-hidden,
-        .accesshide {
-            position: relative;
-            display: block;
-        }
-    }
-}
-
 // Accessibility features
 
 // Accessibility: text 'seen' by screen readers but not visual users.
@@ -520,16 +504,6 @@ a.skip:active {
 
 #group-usersummary {
     width: 14em;
-}
-
-.groupselector {
-    margin-top: 3px;
-    margin-bottom: 3px;
-    display: inline-block;
-}
-
-.groupselector label {
-    display: inline-block;
 }
 
 // Notes
@@ -2196,12 +2170,14 @@ $footer-link-color: $bg-inverse-link-color !default;
     }
 }
 
-.btn-footer-popover {
-    display: none;
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    @include box-shadow($popover-box-shadow);
+.footer-popover {
+    .btn-footer-popover {
+        display: none;
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        @include box-shadow($popover-box-shadow);
+    }
 }
 
 .btn-footer-communication {
@@ -2569,7 +2545,7 @@ $picker-emojis-per-row: 7 !default;
 .emoji-auto-complete {
     height: $picker-row-height;
 
-    .btn.btn-link.btn-icon.emoji-button {
+    .btn.btn-icon.emoji-button {
         height: $picker-emoji-button-size;
         width: $picker-emoji-button-size;
         line-height: $picker-emoji-button-size;
@@ -3096,11 +3072,9 @@ blockquote {
             display: none;
         }
     }
-    button {
+    .showmore-button {
         float: right;
-        &.btn-link {
-            text-decoration: none;
-        }
+        text-decoration: none;
         .icon {
             font-size: $btn-font-size-sm;
             margin: 0;

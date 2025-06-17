@@ -25,18 +25,62 @@ import {
 } from 'core_filters/events';
 
 /**
+ * URL to MathJax.
+ * @type {string|null}
+ */
+let mathJaxUrl = null;
+
+/**
+ * Promise that is resolved when MathJax was loaded.
+ * @type {Promise|null}
+ */
+let mathJaxLoaded = null;
+
+/**
  * Called by the filter when it is active on any page.
- * This does not load MathJAX yet - it addes the configuration to the head incase it gets loaded later.
+ * This does not load MathJAX yet - it adds the configuration in case it gets loaded later.
  * It also subscribes to the filter-content-updated event so MathJax can respond to content loaded by Ajax.
  *
- * @param {Object} params List of configuration params containing mathjaxconfig (text) and lang
+ * @param {Object} params List of configuration params containing mathjaxurl, mathjaxconfig (text) and lang
  */
 export const configure = (params) => {
-    if (window.MathJax) {
-        // Let's still set the locale even if the localization is not yet ported to version 3.2.2
-        // https://docs.mathjax.org/en/v3.2-latest/upgrading/v2.html#not-yet-ported-to-version-3.
-        window.MathJax.config.locale = params.lang;
+    let config = {};
+    try {
+        if (params.mathjaxconfig !== '') {
+            config = JSON.parse(params.mathjaxconfig);
+        }
     }
+    catch (e) {
+        window.console.error('Invalid JSON in mathjaxconfig.', e);
+    }
+    if (typeof config != 'object') {
+        config = {};
+    }
+    if (typeof config.loader !== 'object') {
+        config.loader = {};
+    }
+    if (!Array.isArray(config.loader.load)) {
+        config.loader.load = [];
+    }
+    if (typeof config.startup !== 'object') {
+        config.startup = {};
+    }
+
+    // Always ensure that ui/safe is in the list. Otherwise, there is a risk of XSS.
+    // https://docs.mathjax.org/en/v3.2-latest/options/safe.html.
+    if (!config.loader.load.includes('ui/safe')) {
+        config.loader.load.push('ui/safe');
+    }
+
+    // This filter controls what elements to typeset.
+    config.startup.typeset = false;
+
+    // Let's still set the locale even if the localization is not yet ported to version 3.2.2
+    // https://docs.mathjax.org/en/v3.2-latest/upgrading/v2.html#not-yet-ported-to-version-3.
+    config.locale = params.lang;
+
+    mathJaxUrl = params.mathjaxurl;
+    window.MathJax = config;
 
     // Listen for events triggered when new text is added to a page that needs
     // processing by a filter.
@@ -56,15 +100,18 @@ const typesetNode = (node) => {
         return;
     }
 
-    if (window.MathJax) {
-        window.MathJax.typesetPromise([node]).then(() => {
-            notifyFilterContentRenderingComplete([node]);
-            return;
-        })
-        .catch(e => {
-            window.console.log(e);
-        });
-    }
+    loadMathJax().then(() => {
+        // Chain the calls to typesetPromise as it is recommended.
+        // https://docs.mathjax.org/en/v3.2-latest/web/typeset.html#handling-asynchronous-typesetting.
+        window.MathJax.startup.promise = window.MathJax.startup.promise
+            .then(() => window.MathJax.typesetPromise([node]))
+            .then(() => {
+                notifyFilterContentRenderingComplete([node]);
+            })
+            .catch(e => {
+                window.console.log(e);
+            });
+    });
 };
 
 /**
@@ -73,9 +120,7 @@ const typesetNode = (node) => {
 export const typeset = () => {
     const elements = document.getElementsByClassName('filter_mathjaxloader_equation');
     for (const element of elements) {
-        if (typeof window.MathJax !== "undefined") {
-            typesetNode(element);
-        }
+        typesetNode(element);
     }
 };
 
@@ -85,10 +130,6 @@ export const typeset = () => {
  * @param {CustomEvent} event - Custom event with "nodes" indicating the root of the updated nodes.
  */
 export const contentUpdated = (event) => {
-    if (typeof window.MathJax === "undefined") {
-        return;
-    }
-
     let listOfElementContainMathJax = [];
     let hasMathJax = false;
     // The list of HTMLElements in an Array.
@@ -111,4 +152,27 @@ export const contentUpdated = (event) => {
     listOfElementContainMathJax.forEach((mathjaxElements) => {
         mathjaxElements.forEach((node) => typesetNode(node));
     });
+};
+
+/**
+ * Load the MathJax script.
+ *
+ * @return Promise that is resolved when MathJax was loaded.
+ */
+export const loadMathJax = () => {
+    if (!mathJaxLoaded) {
+        if (!mathJaxUrl) {
+            return Promise.reject(new Error('URL to MathJax not set.'));
+        }
+
+        mathJaxLoaded = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.onload = resolve;
+            script.onerror = reject;
+            script.src = mathJaxUrl;
+            document.getElementsByTagName('head')[0].appendChild(script);
+        });
+    }
+    return mathJaxLoaded;
 };

@@ -4533,7 +4533,11 @@ class assign {
         $o .= $actionformtext;
 
         if ($this->is_blind_marking() && has_capability('mod/assign:viewblinddetails', $this->get_context())) {
-            $o .= $this->get_renderer()->notification(get_string('blindmarkingenabledwarning', 'assign'), 'notifymessage');
+            if ($this->is_marking_anonymous()) {
+                $o .= $this->get_renderer()->notification(get_string('blindmarkingenabledwarning', 'assign'), 'notifymessage');
+            } else {
+                $o .= $this->get_renderer()->notification(get_string('blindmarkingnogradewarning', 'assign'), 'notifymessage');
+            }
         }
 
         // Print the table of submissions.
@@ -4604,7 +4608,8 @@ class assign {
             $jsparams['markingallocation'] = !empty($this->get_instance()->markingallocation);
             $jsparams['cmid'] = $this->get_course_module()->id;
             $jsparams['sesskey'] = sesskey();
-
+            $jsparams['supportssubmissions'] = $this->is_any_submission_plugin_enabled();
+            $jsparams['hassubmissions'] = $this->count_submissions() > 0;
             $PAGE->requires->js_call_amd('mod_assign/bulkactions/grading/bulk_actions', 'init', [$jsparams]);
         }
 
@@ -5415,7 +5420,15 @@ class assign {
                         '',
                         $cangrade
                     );
-                    $gradefordisplay = $gradebookgrade->str_long_grade;
+                    // Display the penalty indicator next to the penalized grade, if applicable.
+                    $penaltyindicator = \core_grades\penalty_manager::show_penalty_indicator(
+                        new \grade_grade([
+                            'deductedmark' => $gradebookgrade->deductedmark ?? 0,
+                            'overridden' => $gradebookgrade->overridden ?? 0,
+                        ], false)
+                    );
+
+                    $gradefordisplay = $penaltyindicator . $gradebookgrade->str_long_grade;
                 } else {
                     // This grade info is the grade from gradebook.
                     // We need user id to determine if the grade is overridden or not.
@@ -5639,11 +5652,16 @@ class assign {
             // Now get the gradefordisplay.
             if ($controller) {
                 $controller->set_grade_range(make_grades_menu($this->get_instance()->grade), $this->get_instance()->grade > 0);
-                $grade->gradefordisplay = $controller->render_grade($PAGE,
-                                                                     $grade->id,
-                                                                     $gradingitem,
-                                                                     $penalisedgrade,
-                                                                     $cangrade);
+                // Display the penalty indicator next to the penalized grade, if applicable.
+                $penaltyindicator = \core_grades\penalty_manager::show_penalty_indicator(
+                    new \grade_grade([
+                        'deductedmark' => $deductedmark,
+                        'overridden' => $userid > 0 ? $this->get_grade_item()->get_grade($userid)->overridden : 0,
+                    ], false)
+                );
+                $gradeoutput = $penaltyindicator . format_float($penalisedgrade, $this->get_grade_item()->get_decimals());
+
+                $grade->gradefordisplay = $controller->render_grade($PAGE, $grade->id, $gradingitem, $gradeoutput, $cangrade);
             } else {
                 // We do not need user id here as the overriden grade should not affect the previous attempts.
                 $grade->gradefordisplay = $this->display_grade($penalisedgrade, false, 0, 0, $deductedmark);
@@ -6019,7 +6037,7 @@ class assign {
         require_once($CFG->dirroot.'/mod/assign/lib.php');
         // Do not push grade to gradebook if blind marking is active as
         // the gradebook would reveal the students.
-        if ($this->is_blind_marking()) {
+        if ($this->is_blind_marking() && !$this->is_marking_anonymous()) {
             return false;
         }
 
@@ -8390,15 +8408,6 @@ class assign {
                         $grade->feedbackfiles = $plugin->files_for_gradebook($grade);
                     }
                     $this->update_grade($grade);
-                    $assign = clone $this->get_instance();
-                    $assign->cmidnumber = $this->get_course_module()->idnumber;
-                    // Set assign gradebook feedback plugin status.
-                    $assign->gradefeedbackenabled = $this->is_gradebook_feedback_enabled();
-
-                    // If markinganonymous is enabled then allow to release grades anonymously.
-                    if (isset($assign->markinganonymous) && $assign->markinganonymous == 1) {
-                        assign_update_grades($assign, $userid);
-                    }
                     $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
                     \mod_assign\event\workflow_state_updated::create_from_user($this, $user, $state)->trigger();
                 }
@@ -9719,6 +9728,15 @@ class assign {
         }
 
         return !empty($submission) && $submission->status !== ASSIGN_SUBMISSION_STATUS_SUBMITTED && $timedattemptstarted;
+    }
+
+    /**
+     * Is "Allow partial release of grades while marking anonymously" enabled?
+     *
+     * @return bool
+     */
+    public function is_marking_anonymous(): bool {
+        return isset($this->get_instance()->markinganonymous) && $this->get_instance()->markinganonymous;
     }
 }
 

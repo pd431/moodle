@@ -24,6 +24,7 @@ use context_user;
 use core\context;
 use core_component;
 use core_date;
+use core_user;
 use html_writer;
 use lang_string;
 use moodle_url;
@@ -375,10 +376,8 @@ class user extends base {
 
         $namefields = fields::get_name_fields(true);
 
-        // Create a dummy user object containing all name fields.
-        $dummyuser = (object) array_combine($namefields, $namefields);
         $viewfullnames = has_capability('moodle/site:viewfullnames', context_system::instance());
-        $dummyfullname = fullname($dummyuser, $viewfullnames);
+        $dummyfullname = core_user::get_dummy_fullname(null, ['override' => $viewfullnames]);
 
         // Extract any name fields from the fullname format in the order that they appear.
         $matchednames = array_values(order_in_string($namefields, $dummyfullname));
@@ -420,6 +419,7 @@ class user extends base {
             'phone1' => new lang_string('phone1'),
             'phone2' => new lang_string('phone2'),
             'address' => new lang_string('address'),
+            'firstaccess' => new lang_string('firstaccess'),
             'lastaccess' => new lang_string('lastaccess'),
             'suspended' => new lang_string('suspended'),
             'confirmed' => new lang_string('confirmed', 'admin'),
@@ -447,6 +447,7 @@ class user extends base {
             case 'suspended':
                 $fieldtype = column::TYPE_BOOLEAN;
                 break;
+            case 'firstaccess':
             case 'lastaccess':
             case 'timecreated':
             case 'timemodified':
@@ -521,6 +522,16 @@ class user extends base {
 
             $filters[] = $filter;
         }
+
+        // Never accessed filter.
+        $filters[] = (new filter(
+            boolean_select::class,
+            'neveraccessed',
+            new lang_string('neveraccessed', 'core_reportbuilder'),
+            $this->get_entity_name(),
+            "CASE WHEN {$tablealias}.firstaccess = {$tablealias}.lastaccess OR {$tablealias}.lastaccess = 0 THEN 1 ELSE 0 END",
+        ))
+            ->add_joins($this->get_joins());
 
         // User select filter.
         $filters[] = (new filter(
